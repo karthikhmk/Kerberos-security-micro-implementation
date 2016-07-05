@@ -1,0 +1,103 @@
+/* C1P.c */
+#include        <stdio.h>
+#include        <rpc/rpc.h> 
+#include        "C1K.h"
+#include        "C2S.h"
+#include	<stdlib.h>
+
+main(argc, argv)
+int     argc;
+char    *argv[];
+{
+	CLIENT          *cl;            /* RPC handle */
+	char            *keyserver;
+	char            *server;
+	struct request arg1;
+	struct token t;
+    struct reply *reply_msg;	
+	keyserver = argv[3];
+	int n,l;
+	struct reqMsg mm;
+	struct netSReply *numeric_res,*alpha_res;
+	server = argv[4];
+	char cc[100];
+/********************************************/
+	/* Set up connection with the server which provides services given in AS_PROG.
+	Connection is called client "handle." */
+	if ( (cl = clnt_create(keyserver, CP_KP_PROG, CP_KP_VERS, "udp")) == NULL) {
+	 clnt_pcreateerror(server);
+	 exit(2);
+	}
+	
+/********************************************/
+	memset(arg1.rc,'\0',8);
+	memset(arg1.rs,'\0',8);
+	memcpy(arg1.rc,argv[1], 7);
+	memcpy(arg1.rs,argv[2], 7);
+	printf("request message is C=%s\tS=%s\n",arg1.rc,arg1.rs);
+	if ((reply_msg = requestsessionkey_1(arg1,cl)) == NULL ){
+	clnt_perror(cl, "call failed");
+		exit(3);
+        }
+		printf("Reply recieved:\n Client_id=%s\tSession_id=%s\tsession_Key=%s\ntoken=%s%s%s\n",reply_msg->C,reply_msg->S,reply_msg->key,reply_msg->t.C,reply_msg->t.S,reply_msg->t.key);
+		
+		printf("calling server...\n");
+			/* Set up connection with the server which provides services given in AS_PROG.
+	Connection is called client "handle." */
+	if ( (cl = clnt_create(server, CP_SP_PROG, CP_SP_VERS, "udp")) == NULL) {
+	 clnt_pcreateerror(server);
+	 exit(2);
+	}
+	
+	
+		memset(mm.C,'\0',8);
+memset(mm.t.C,'\0',8);
+memset(mm.t.S,'\0',8);
+memset(mm.a.S,'\0',25);
+memcpy(mm.C,reply_msg->C,7);
+	memcpy(mm.t.C,reply_msg->t.C,7);
+	memcpy(mm.t.S,reply_msg->t.S,7);
+	memcpy(mm.t.key,reply_msg->t.key,7);
+	printf("Arguments passed to application server\n Client ID=%s\tServer ID=%s\n",mm.C,mm.t.S);
+//printf("%s",mm.t.S[1]);
+printf("-------------------------------------------------------\n");
+printf("\tAvailable Services\n");
+printf("-------------------------------------------------------\n");
+printf("1) Alpha - removes all non-alphabetic characters\n2) numeric  -removes all non-numeric characters\n\n");
+printf("enter choice number:");
+scanf("%d",&n);
+switch(n){
+case 2:
+printf("enter input string:");
+scanf("%s",&cc);
+l=strlen(cc);
+memcpy(mm.a.S,cc,l);
+mm.a.len=l;
+	if ( (numeric_res = numeric_1(mm,cl) ) == NULL ){
+	clnt_perror(cl, "call failed");
+		exit(3);
+        }
+		printf("Reply recieved:\nnumeric= %s \t length=%d\n",numeric_res->r.a1.S,numeric_res->rlen);
+		break;
+case 1:
+printf("enter input string:");
+scanf("%s",&cc);
+l=strlen(cc);
+memcpy(mm.a.S,cc,l);
+mm.a.len=l;
+		if ( (alpha_res = alpha_1(mm,cl) ) == NULL ){
+	clnt_perror(cl, "call failed");
+		exit(3);
+        }
+		printf("Reply recieved:\nalpha= %s \t length=%d\n",alpha_res->r.a1.S,alpha_res->rlen);
+		break;
+default:printf("enter number either 1 or 2\n");
+}
+        clnt_destroy(cl);               /* done with the handle 
+		*/
+	exit(0);
+}
+
+
+
+

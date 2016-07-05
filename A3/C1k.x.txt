@@ -1,0 +1,28 @@
+struct request{
+int len;
+unsigned char rc[8];
+unsigned char rs[8];
+};
+struct token{
+unsigned char C[8];
+unsigned char S[8];
+unsigned key[8];
+};
+
+struct reply{
+unsigned char C[8];
+unsigned char S[8];
+unsigned key[8];
+struct token t;
+};
+
+struct netReply{
+int len;
+struct reply r;
+};
+
+program CP_KP_PROG {
+	version CP_KP_VERS {
+	reply REQUESTSESSIONKEY(token) = 1;
+	} = 1;
+ }= 0x34569999;

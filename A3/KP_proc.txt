@@ -1,0 +1,81 @@
+/* proc.c */
+#include        <rpc/rpc.h>     /* standard RPC include file */
+#include        "C2S.h"
+#include 	<stdio.h>
+#include 	<stdlib.h>
+#include    <stdbool.h>
+
+netSReply* alpha_1(reqMsg r){
+if(SP_validator()){
+printf("alpha service called\n");
+printf("Client ID:%s\n",r.C);
+static netSReply rep2;
+int n=0,i=0;
+int l=strlen(r.a.S);
+printf("Arguments: len=%d\t Arg =%s\n",l,r.a.S);
+printf("Token components:\n Client ID = %s\nServer ID = %s\nstring session key = %s\n",r.t.C,r.t.S,r.t.key);
+char a[l+1],res[l+1],b[l+1];
+memset(a,'\0',l+1);
+memset(b,'\0',l+1);
+memset(res,'\0',l+1);
+memcpy(a,r.a.S,l);
+//printf("server recieved message\n len=%d",l);
+while(i<l){
+if(a[i]>= '!' && a[i] <= '@')
+{ 
+ }
+ else
+ {
+ res[n]=a[i];
+  n++;
+ }
+ i++;
+ }
+ l=strlen(res);
+ replyBuilder(&rep2.r.a1.S,&res,r);
+ rep2.rlen=l;
+ printf("reply sent by alpha func :%s\n",rep2.r.a1.S);
+return(&rep2);
+}
+}
+
+netSReply* numeric_1(reqMsg r){
+if(SP_validator()){
+printf("server recieved message\n");
+printf("Numeric service called\n");
+printf("Client ID:%s\n",r.C);
+static netSReply rep1;
+int n=0,i=0;
+int l=strlen(r.a.S);
+printf("Arguments: len=%d\t Arg =%s\n",l,r.a.S);
+printf("Token components:\n Client ID = %s\nServer ID = %s\nstring session key = %s\n",r.t.C,r.t.S,r.t.key);
+char a[l+1],res[l+1],b[l+1];
+memset(a,'\0',l+1);
+memset(b,'\0',l+1);
+memset(res,'\0',l+1);
+memcpy(a,r.a.S,l);
+while(i<l){
+if(a[i]>= '!' && a[i] <= '@')
+{ 
+res[n]=a[i];
+  n++;
+ }
+ else
+ {
+ }
+ i++;
+ }
+ l=strlen(res);
+ replyBuilder(&rep1.r.a1.S,&res,r);
+ rep1.rlen=l;
+return(&rep1);
+}
+}
+
+SP_validator(){
+return true;
+}
+
+replyBuilder(char *c,char *res,reqMsg r){
+memcpy(c,res,strlen(res));
+}

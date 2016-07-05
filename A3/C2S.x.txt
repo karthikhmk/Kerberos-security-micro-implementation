@@ -1,0 +1,34 @@
+struct tokenS{
+unsigned char C[8];
+unsigned char S[8];
+unsigned key[8];
+};
+
+struct args{
+int len;
+unsigned char S[100];
+};
+
+struct replyS{
+unsigned char C1[8];
+unsigned char S1[8];
+struct args a1;
+};
+
+struct netSReply{
+int rlen;
+struct replyS r;
+};
+
+struct reqMsg{
+unsigned char C[8];
+struct args a;
+struct tokenS t;
+};
+
+program CP_SP_PROG {
+	version CP_SP_VERS {
+	netSReply ALPHA(reqMsg) = 1;
+	netSReply NUMERIC(reqMsg) = 2;
+	} = 1;
+ }= 0x34599999;
